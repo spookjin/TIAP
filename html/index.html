@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerenciamento de Estoque — Base (HTML/CSS/JS)</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-light">
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">📦</div>
+        <div>
+          <div class="brand-title">Inventory</div>
+          <div class="brand-subtitle">Base HTML • CSS • JS</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="produtos">Produtos</button>
+        <button class="nav-item" data-view="categorias">Categorias</button>
+        <button class="nav-item" data-view="relatorios">Relatórios</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="toggleTheme" class="btn btn-ghost w-100">Alternar tema</button>
+        <a id="exportCsv" class="btn btn-outline w-100" href="#" download="produtos.csv">Exportar CSV</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="search">
+          <input id="searchInput" class="input" placeholder="Buscar por nome, categoria ou SKU…" />
+        </div>
+        <div class="actions">
+          <select id="filterCategoria" class="select">
+            <option value="">Todas categorias</option>
+          </select>
+          <select id="filterStatus" class="select">
+            <option value="">Todos status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+          <button id="btnNovo" class="btn btn-primary">Novo produto</button>
+        </div>
+      </header>
+
+      <section id="view-produtos" class="card">
+        <div class="table-wrap">
+          <table class="table" id="tabelaProdutos" aria-describedby="LegendaTabela">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Qtd</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th style="width: 120px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="emptyState" class="empty hidden">
+            <div>Sem resultados no momento.</div>
+            <small>Dica: ajuste os filtros ou cadastre um novo produto.</small>
+          </div>
+        </div>
+        <footer class="table-footer">
+          <div id="count">0 itens</div>
+          <div class="pagination">
+            <button class="btn btn-ghost" id="prevPage">&larr;</button>
+            <span id="pageInfo">1 / 1</span>
+            <button class="btn btn-ghost" id="nextPage">&rarr;</button>
+          </div>
+        </footer>
+      </section>
+
+      <section id="view-categorias" class="card hidden">
+        <h2 class="section-title">Categorias</h2>
+        <div class="grid-2">
+          <div>
+            <form id="formCategoria" class="form">
+              <input id="categoriaNome" class="input" placeholder="Nova categoria" required />
+              <button class="btn btn-primary" type="submit">Adicionar</button>
+            </form>
+          </div>
+          <div>
+            <ul id="listaCategorias" class="tag-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-relatorios" class="card hidden">
+        <h2 class="section-title">Relatórios (demo)</h2>
+        <p>Este é um espaço para você plugar gráficos/relatórios futuramente. Por enquanto, mostramos números simples.</p>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Produtos Ativos</div>
+            <div class="stat-value" id="statAtivos">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Itens em Falta (&lt;= 5)</div>
+            <div class="stat-value" id="statFalta">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Valor total em estoque</div>
+            <div class="stat-value" id="statValor">—</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Produto -->
+  <dialog id="produtoModal" class="modal">
+    <form id="formProduto" method="dialog" class="modal-card">
+      <header class="modal-header">
+        <h3 id="modalTitulo">Novo produto</h3>
+        <button type="button" class="btn btn-ghost" id="fecharModal" aria-label="Fechar">&times;</button>
+      </header>
+      <div class="modal-body grid-2">
+        <div class="form-field">
+          <label>SKU</label>
+          <input id="sku" class="input" required pattern="[A-Za-z0-9-]{3,}" />
+        </div>
+        <div class="form-field">
+          <label>Nome</label>
+          <input id="nome" class="input" required />
+        </div>
+        <div class="form-field">
+          <label>Categoria</label>
+          <select id="categoria" class="select" required></select>
+        </div>
+        <div class="form-field">
+          <label>Preço (R$)</label>
+          <input id="preco" class="input" type="number" step="0.01" min="0" required />
+        </div>
+        <div class="form-field">
+          <label>Quantidade</label>
+          <input id="quantidade" class="input" type="number" step="1" min="0" required />
+        </div>
+        <div class="form-field">
+          <label>Status</label>
+          <select id="status" class="select">
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+        <div class="form-field full">
+          <label>Descrição</label>
+          <textarea id="descricao" class="textarea" rows="3" placeholder="Opcional"></textarea>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button class="btn btn-outline" type="button" id="cancelarModal">Cancelar</button>
+        <button class="btn btn-primary" type="submit" id="salvarProduto">Salvar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div id="toaster" class="toaster"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
